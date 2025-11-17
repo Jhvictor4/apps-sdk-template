@@ -11,10 +11,9 @@ import PokemonStatsCard from "./components/molecules/PokemonStatsCard";
 import PokemonAbilitiesCard from "./components/molecules/PokemonAbilitiesCard";
 import PokemonEvolutionsCard from "./components/molecules/PokemonEvolutionsCard";
 import { getTypeTheme } from "./pokemonTheme";
-import type { Pokemon } from "./types";
 import { useWidgetState } from "@/utils";
 import { defineWidget } from "@/utils/defineWidget";
-import { PokemonSchema, examplePokemonData } from "@apps-sdk-template/shared";
+import { PokemonSchema, examplePokemonData, type Pokemon } from "@apps-sdk-template/shared";
 
 function PokemonWidgetComponent() {
   const fetchedPokemon = useToolOutput() as Pokemon;

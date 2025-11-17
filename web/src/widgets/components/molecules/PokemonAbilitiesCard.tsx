@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { type Pokemon } from "../../types";
+import { type Pokemon } from "@apps-sdk-template/shared";
 import { type TypeTheme } from "../../pokemonTheme";
 
 type PokemonAbilitiesCardProps = {

@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { type Pokemon } from "../../types";
+import { type Pokemon } from "@apps-sdk-template/shared";
 import { type TypeTheme } from "../../pokemonTheme";
 
 type PokemonEvolutionsCardProps = {

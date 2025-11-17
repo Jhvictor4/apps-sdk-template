@@ -1,7 +1,7 @@
 import NavigationButton from "../atoms/NavigationButton";
 import MetricChip from "../atoms/MetricChip";
 import { typesSvgs, getTypeTheme, type TypeTheme } from "../../pokemonTheme";
-import { type Pokemon } from "../../types";
+import { type Pokemon } from "@apps-sdk-template/shared";
 import { ChevronLeft, ChevronRight, Ruler, Weight } from "lucide-react";
 
 type PokemonHeroCardProps = {
