@@ -11,6 +11,8 @@ import path from "path";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { faker } from "@faker-js/faker";
+import { z } from "zod";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,6 +20,68 @@ const __dirname = dirname(__filename);
 interface WidgetMetadata {
   name: string;
   exampleOutput: unknown;
+}
+
+/**
+ * Generate example data from Zod schema using faker
+ */
+function generateExampleFromZodSchema(schema: z.ZodTypeAny): unknown {
+  const typeName = schema._def?.typeName;
+  console.log('[faker] Processing schema:', typeName || schema.constructor.name);
+
+  if (typeName === 'ZodObject' || schema instanceof z.ZodObject) {
+    const shape = (schema as any).shape;
+    console.log('[faker]   ZodObject shape keys:', Object.keys(shape));
+    const example: Record<string, unknown> = {};
+
+    for (const [key, fieldSchema] of Object.entries(shape)) {
+      const value = generateExampleFromZodSchema(fieldSchema as z.ZodTypeAny);
+      console.log(`[faker]   ${key}:`, value);
+      example[key] = value;
+    }
+
+    console.log('[faker]   Returning example:', example);
+    return example;
+  }
+
+  if (typeName === 'ZodString' || schema instanceof z.ZodString) {
+    return faker.lorem.word();
+  }
+
+  if (typeName === 'ZodNumber' || schema instanceof z.ZodNumber) {
+    return faker.number.int({ min: 1, max: 100 });
+  }
+
+  if (typeName === 'ZodBoolean' || schema instanceof z.ZodBoolean) {
+    return faker.datatype.boolean();
+  }
+
+  if (typeName === 'ZodArray' || schema instanceof z.ZodArray) {
+    const element = (schema as any).element;
+    const count = faker.number.int({ min: 2, max: 3 });
+    return Array.from({ length: count }, () => generateExampleFromZodSchema(element));
+  }
+
+  if (typeName === 'ZodOptional' || typeName === 'ZodNullable') {
+    return generateExampleFromZodSchema((schema as any).unwrap());
+  }
+
+  if (typeName === 'ZodDefault') {
+    return schema._def.defaultValue();
+  }
+
+  if (typeName === 'ZodEnum') {
+    const values = schema._def.values;
+    return faker.helpers.arrayElement(values);
+  }
+
+  if (typeName === 'ZodUnion') {
+    const options = schema._def.options;
+    return generateExampleFromZodSchema(faker.helpers.arrayElement(options));
+  }
+
+  console.warn('[faker] Unknown schema type:', typeName);
+  return null;
 }
 
 async function main() {
@@ -50,25 +114,76 @@ async function main() {
         continue;
       }
 
-      // Parse exampleOutput from defineWidget call
-      // Match: exampleOutput: examplePokemonData
-      const exampleMatch = content.match(/exampleOutput:\s*(\w+)/);
+      // Parse exampleOutput from defineWidget call (skip commented lines)
+      // Match: exampleOutput: examplePokemonData (but not // exampleOutput:)
+      const lines = content.split('\n');
+      let exampleName: string | null = null;
 
-      if (exampleMatch) {
-        const exampleName = exampleMatch[1];
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('//')) continue; // Skip comment lines
+        const match = trimmed.match(/exampleOutput:\s*(\w+)/);
+        if (match) {
+          exampleName = match[1];
+          break;
+        }
+      }
 
+      let exampleOutput: unknown = null;
+
+      if (exampleName) {
         // Get example from shared package
         if (shared[exampleName]) {
-          metadataMap[widgetName] = {
-            name: widgetName,
-            exampleOutput: shared[exampleName],
-          };
+          exampleOutput = shared[exampleName];
           console.log(`[extract-metadata] ✓ Extracted metadata for: ${widgetName} (using ${exampleName})`);
         } else {
           console.warn(`[extract-metadata] ⚠ ${widgetName}: ${exampleName} not found in shared package`);
         }
+      }
+
+      // If no exampleOutput, try to generate from schema (outputSchema or schema field)
+      if (!exampleOutput) {
+        let schemaName: string | null = null;
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('//')) continue; // Skip comment lines
+          const match = trimmed.match(/(?:outputSchema|schema):\s*(\w+)/);
+          if (match) {
+            schemaName = match[1];
+            break;
+          }
+        }
+
+        if (schemaName) {
+          if (shared[schemaName]) {
+            try {
+              const schema = shared[schemaName];
+              console.log(`[extract-metadata]   Schema type:`, schema.constructor.name);
+              console.log(`[extract-metadata]   Schema._def:`, schema._def?.typeName);
+              console.log(`[extract-metadata]   Has shape?:`, 'shape' in schema);
+              exampleOutput = generateExampleFromZodSchema(schema);
+              console.log(`[extract-metadata] ✓ Generated metadata for: ${widgetName} (using faker from ${schemaName})`);
+              console.log(`[extract-metadata]   Generated data:`, JSON.stringify(exampleOutput, null, 2).substring(0, 200) + '...');
+            } catch (error) {
+              console.error(`[extract-metadata] ✗ Failed to generate from ${schemaName}:`, error);
+            }
+          } else {
+            console.warn(`[extract-metadata] ⚠ ${widgetName}: ${schemaName} not found in shared package`);
+          }
+        } else {
+          console.warn(`[extract-metadata] ⚠ ${widgetName}: No exampleOutput or schema found`);
+        }
+      }
+
+      console.log(`[extract-metadata]   exampleOutput truthy?`, !!exampleOutput);
+      if (exampleOutput) {
+        metadataMap[widgetName] = {
+          name: widgetName,
+          exampleOutput,
+        };
       } else {
-        console.warn(`[extract-metadata] ⚠ ${widgetName}: Could not parse exampleOutput`);
+        console.warn(`[extract-metadata] ⚠ ${widgetName}: exampleOutput is falsy, not adding to metadata`);
       }
     } catch (error) {
       console.error(`[extract-metadata] Failed to process ${widgetFile}:`, error);

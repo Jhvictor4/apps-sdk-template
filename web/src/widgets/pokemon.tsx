@@ -13,7 +13,7 @@ import PokemonEvolutionsCard from "./components/molecules/PokemonEvolutionsCard"
 import { getTypeTheme } from "./pokemonTheme";
 import { useWidgetState } from "@/utils";
 import { defineWidget } from "@/utils/defineWidget";
-import { PokemonSchema, examplePokemonData, type Pokemon } from "@apps-sdk-template/shared";
+import { PokemonSchema, type Pokemon } from "@apps-sdk-template/shared";
 
 function PokemonWidgetComponent() {
   // Test change for rebuild timing
@@ -161,7 +161,7 @@ function PokemonWidgetComponent() {
 // Define widget with schema and example data
 const PokemonWidget = defineWidget({
   schema: PokemonSchema,
-  exampleOutput: examplePokemonData,
+  // exampleOutput: examplePokemonData, // Test: commented out to test faker generation
   component: PokemonWidgetComponent,
 });
 
