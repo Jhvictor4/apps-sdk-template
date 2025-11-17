@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import "@/index.css";
 
+// Vite glob import: preload all widget modules at build time
+const widgets = import.meta.glob<{ default: React.ComponentType }>("./widgets/*.tsx");
+
 /**
  * Widget Development Loader
  *
@@ -18,8 +21,22 @@ function WidgetLoader() {
     const widgetName = params.get("widget") || "pokemon";
 
     console.log(`[WidgetLoader] Loading widget: ${widgetName}`);
+    console.log(`[WidgetLoader] Available widgets:`, Object.keys(widgets));
 
-    import(`./widgets/${widgetName}.tsx`)
+    const widgetPath = `./widgets/${widgetName}.tsx`;
+    const loader = widgets[widgetPath];
+
+    if (!loader) {
+      const availableWidgets = Object.keys(widgets)
+        .map((path) => path.replace("./widgets/", "").replace(".tsx", ""))
+        .join(", ");
+      const errorMsg = `Widget "${widgetName}" not found. Available: ${availableWidgets}`;
+      console.error(`[WidgetLoader] ${errorMsg}`);
+      setError(errorMsg);
+      return;
+    }
+
+    loader()
       .then((module) => {
         console.log(`[WidgetLoader] Widget "${widgetName}" loaded successfully`);
         setWidgetComponent(() => module.default);
