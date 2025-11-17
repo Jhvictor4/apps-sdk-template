@@ -50,7 +50,7 @@ if (env.NODE_ENV !== "production") {
     const requestedFile = req.path.slice(1); // Remove leading slash
 
     if (htmlFiles.includes(requestedFile)) {
-      const htmlPath = path.join(webAppRoot, "dev", requestedFile);
+      const htmlPath = path.join(webAppRoot, "public/dev", requestedFile);
 
       try {
         let html = await readFile(htmlPath, "utf-8");
