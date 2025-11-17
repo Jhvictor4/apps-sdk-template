@@ -114,7 +114,7 @@ function PokemonWidgetComponent() {
       <div className="relative flex flex-col gap-6 p-6 lg:p-8">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
-            <span className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-slate-500">Pokemon</span>
+            <span className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-slate-500">Pokemon Widget ❤️</span>
             <span className="text-lg font-bold text-slate-800">{formattedOrder}</span>
           </div>
           <Button

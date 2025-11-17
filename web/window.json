@@ -1,0 +1,94 @@
+{
+    "toolInput": {
+        "name": "arceus"
+    },
+    "toolOutput": {
+        "id": 493,
+        "name": "arceus",
+        "description": "It is described in mythology as the Pokémon that shaped the universe with its 1,000 arms.",
+        "color": "white",
+        "order": 608,
+        "heightInMeters": 3.2,
+        "weightInKilograms": 320,
+        "imageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/493.png",
+        "stats": [
+            {
+                "id": "hp",
+                "name": "HP",
+                "value": 120
+            },
+            {
+                "id": "attack",
+                "name": "Attack",
+                "value": 120
+            },
+            {
+                "id": "defense",
+                "name": "Defense",
+                "value": 120
+            },
+            {
+                "id": "special-attack",
+                "name": "Special Attack",
+                "value": 120
+            },
+            {
+                "id": "special-defense",
+                "name": "Special Defense",
+                "value": 120
+            },
+            {
+                "id": "speed",
+                "name": "Speed",
+                "value": 120
+            }
+        ],
+        "types": [
+            {
+                "id": "normal",
+                "name": "Normal"
+            }
+        ],
+        "abilities": [
+            {
+                "id": "multitype",
+                "name": "Multitype",
+                "description": "Changes type to match the held Plate."
+            }
+        ],
+        "evolutions": [
+            {
+                "id": 493,
+                "name": "arceus",
+                "order": 608,
+                "imageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/493.png",
+                "isCurrent": true
+            }
+        ]
+    },
+    "toolResponseMetadata": {
+        "id": 493
+    },
+    "displayMode": "inline",
+    "maxHeight": 600,
+    "theme": "dark",
+    "locale": "en-US",
+    "safeArea": {
+        "insets": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+        }
+    },
+    "userAgent": {
+        "device": {
+            "type": "desktop"
+        },
+        "capabilities": {
+            "hover": true,
+            "touch": false
+        }
+    },
+    "widgetState": null
+}

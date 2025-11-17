@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Test with window.openai Injection</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .header h1 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+      }
+      .header p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      iframe {
+        width: 100%;
+        height: 700px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .info {
+        background: #e0f2fe;
+        border: 1px solid #0284c7;
+        color: #0c4a6e;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Widget Test Environment</h1>
+        <p>Testing widget with window.openai injected from window.json</p>
+        <div class="status">
+          <span class="status-dot"></span>
+          <span id="status">Initializing...</span>
+        </div>
+      </div>
+
+      <div class="info">
+        💡 This page loads the widget in an iframe and injects <code>window.openai</code> with data from
+        <strong>window.json</strong>. The widget should automatically detect and use the injected API.
+      </div>
+
+      <iframe id="widget-iframe" src="http://localhost:5173/widget-dev.html?widget=pokemon"></iframe>
+    </div>
+
+    <script>
+      const iframe = document.getElementById("widget-iframe");
+      const statusEl = document.getElementById("status");
+
+      // Load window.json data
+      async function loadWindowConfig() {
+        try {
+          statusEl.textContent = "Loading window.json...";
+          const response = await fetch("/window.json");
+          const config = await response.json();
+
+          statusEl.textContent = "Waiting for iframe to load...";
+          return config;
+        } catch (error) {
+          statusEl.textContent = `Error loading window.json: ${error.message}`;
+          console.error("Failed to load window.json:", error);
+          return null;
+        }
+      }
+
+      // Inject window.openai into iframe
+      async function injectOpenAI() {
+        const config = await loadWindowConfig();
+        if (!config) return;
+
+        iframe.onload = () => {
+          try {
+            console.log("[Test] Iframe loaded, injecting window.openai...");
+            console.log("[Test] Config:", config);
+
+            // Inject window.openai
+            iframe.contentWindow.openai = {
+              // Tool output
+              toolOutput: config.toolOutput,
+
+              // Call tool (mock implementation)
+              callTool: async (name, params) => {
+                console.log(`[Test] callTool called: ${name}`, params);
+                return {
+                  structuredContent: config.toolOutput,
+                };
+              },
+
+              // Display mode
+              displayMode: config.displayMode,
+              requestDisplayMode: (opts) => {
+                console.log("[Test] requestDisplayMode called:", opts);
+                config.displayMode = opts.mode;
+              },
+
+              // Theme
+              theme: config.theme,
+
+              // Locale
+              locale: config.locale,
+
+              // Max height
+              maxHeight: config.maxHeight,
+
+              // Safe area
+              safeArea: config.safeArea,
+
+              // User agent
+              userAgent: config.userAgent,
+
+              // Widget state
+              widgetState: config.widgetState,
+              setWidgetState: (newState) => {
+                console.log("[Test] setWidgetState called:", newState);
+                config.widgetState = newState;
+              },
+            };
+
+            // Also inject global state for skybridge
+            iframe.contentWindow.__OPENAI_GLOBAL_STATE__ = {
+              displayMode: config.displayMode,
+              theme: config.theme,
+              locale: config.locale,
+              maxHeight: config.maxHeight,
+              safeArea: config.safeArea,
+              userAgent: config.userAgent,
+            };
+
+            console.log("[Test] ✓ window.openai injected successfully");
+            statusEl.textContent = `✓ window.openai injected with ${config.toolOutput.name} data`;
+          } catch (error) {
+            console.error("[Test] Failed to inject window.openai:", error);
+            statusEl.textContent = `Error: ${error.message}`;
+          }
+        };
+      }
+
+      // Start injection
+      injectOpenAI();
+    </script>
+  </body>
+</html>
