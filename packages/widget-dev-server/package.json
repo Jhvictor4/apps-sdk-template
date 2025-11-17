@@ -1,0 +1,21 @@
+{
+  "name": "@apps-sdk-template/widget-dev-server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "vite": "^6.0.11",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.14.14",
+    "typescript": "^5.7.3"
+  }
+}
