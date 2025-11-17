@@ -354,7 +354,7 @@ pnpm build
 **증상**: Widget이 로드되지 않고 안내 페이지만 표시됨
 
 **해결**:
-- 개발 환경: `http://localhost:3000/test-widget.html` 사용
+- 개발 환경: `http://localhost:3000/dev/test-widget.html` 사용
 - 프로덕션: 부모 iframe에서 window.openai 주입 필요
 
 ### HMR이 작동하지 않음
