@@ -73,6 +73,11 @@ if (env.NODE_ENV !== "production") {
 } else {
   // Production: serve static files from dist
   const webDistPath = path.resolve(__dirname, "../assets");
+
+  // Serve /dev files (widget-dev.html, test-widget.html)
+  app.use("/dev", express.static(path.join(webDistPath, "dev")));
+
+  // Serve widget bundles and other assets
   app.use(express.static(webDistPath));
 }
 
