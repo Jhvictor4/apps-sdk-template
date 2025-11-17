@@ -1,7 +1,6 @@
 import type { Express, RequestHandler } from "express";
 import { readFile } from "fs/promises";
 import path from "path";
-import type { ViteDevServer } from "vite";
 
 export interface WidgetDevServerOptions {
   /**
@@ -41,7 +40,13 @@ export interface WidgetDevServerOptions {
  * app.use(viteMiddleware);
  * ```
  */
-export async function createWidgetDevServer(options: WidgetDevServerOptions = {}) {
+export async function createWidgetDevServer(
+  options: WidgetDevServerOptions = {},
+): Promise<{
+  devMiddleware: RequestHandler;
+  viteMiddleware: any;
+  vite: any;
+}> {
   // Import Vite dynamically
   const { createServer, loadConfigFromFile, searchForWorkspaceRoot } = await import("vite");
 
@@ -51,7 +56,6 @@ export async function createWidgetDevServer(options: WidgetDevServerOptions = {}
   const {
     webAppRoot = path.join(workspaceRoot, "web"),
     htmlPath = "public/dev",
-    urlPrefix = "/dev",
   } = options;
 
   // Load Vite config from web app
@@ -141,7 +145,10 @@ export async function createWidgetDevServer(options: WidgetDevServerOptions = {}
 export async function mountWidgetDevServer(
   app: Express,
   options: WidgetDevServerOptions = {},
-) {
+): Promise<{
+  devMiddleware: RequestHandler;
+  viteMiddleware: any;
+}> {
   const { urlPrefix = "/dev" } = options;
   const { devMiddleware, viteMiddleware } = await createWidgetDevServer(options);
 
