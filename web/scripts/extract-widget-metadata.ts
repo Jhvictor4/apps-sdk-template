@@ -27,20 +27,15 @@ interface WidgetMetadata {
  */
 function generateExampleFromZodSchema(schema: z.ZodTypeAny): unknown {
   const typeName = schema._def?.typeName;
-  console.log('[faker] Processing schema:', typeName || schema.constructor.name);
 
   if (typeName === 'ZodObject' || schema instanceof z.ZodObject) {
     const shape = (schema as any).shape;
-    console.log('[faker]   ZodObject shape keys:', Object.keys(shape));
     const example: Record<string, unknown> = {};
 
     for (const [key, fieldSchema] of Object.entries(shape)) {
-      const value = generateExampleFromZodSchema(fieldSchema as z.ZodTypeAny);
-      console.log(`[faker]   ${key}:`, value);
-      example[key] = value;
+      example[key] = generateExampleFromZodSchema(fieldSchema as z.ZodTypeAny);
     }
 
-    console.log('[faker]   Returning example:', example);
     return example;
   }
 
@@ -80,7 +75,7 @@ function generateExampleFromZodSchema(schema: z.ZodTypeAny): unknown {
     return generateExampleFromZodSchema(faker.helpers.arrayElement(options));
   }
 
-  console.warn('[faker] Unknown schema type:', typeName);
+  // Fallback
   return null;
 }
 
@@ -158,13 +153,8 @@ async function main() {
         if (schemaName) {
           if (shared[schemaName]) {
             try {
-              const schema = shared[schemaName];
-              console.log(`[extract-metadata]   Schema type:`, schema.constructor.name);
-              console.log(`[extract-metadata]   Schema._def:`, schema._def?.typeName);
-              console.log(`[extract-metadata]   Has shape?:`, 'shape' in schema);
-              exampleOutput = generateExampleFromZodSchema(schema);
+              exampleOutput = generateExampleFromZodSchema(shared[schemaName]);
               console.log(`[extract-metadata] ✓ Generated metadata for: ${widgetName} (using faker from ${schemaName})`);
-              console.log(`[extract-metadata]   Generated data:`, JSON.stringify(exampleOutput, null, 2).substring(0, 200) + '...');
             } catch (error) {
               console.error(`[extract-metadata] ✗ Failed to generate from ${schemaName}:`, error);
             }
@@ -176,14 +166,11 @@ async function main() {
         }
       }
 
-      console.log(`[extract-metadata]   exampleOutput truthy?`, !!exampleOutput);
       if (exampleOutput) {
         metadataMap[widgetName] = {
           name: widgetName,
           exampleOutput,
         };
-      } else {
-        console.warn(`[extract-metadata] ⚠ ${widgetName}: exampleOutput is falsy, not adding to metadata`);
       }
     } catch (error) {
       console.error(`[extract-metadata] Failed to process ${widgetFile}:`, error);
