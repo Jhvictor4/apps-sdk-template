@@ -12,16 +12,15 @@ Apps in ChatGPT SDK용 Widget을 HMR과 함께 개발하는 가이드입니다.
 pnpm dev
 ```
 
-이 명령어는 다음 두 서버를 동시에 실행합니다:
-- **MCP Server**: `http://localhost:3000` (기존 서버)
-- **Widget Dev Server**: `http://localhost:5173` (Widget 개발 서버)
+이 명령어는 **MCP Server**를 시작하며, 개발 모드에서는 **Vite dev server가 자동으로 같은 포트에 마운트**됩니다:
+- **Server**: `http://localhost:3000` (MCP Server + Widget Dev Server 통합)
 
 ### 2. Widget 개발 페이지 접속
 
 브라우저에서 다음 URL로 접속:
 
 ```
-http://localhost:5173/widget-dev.html?widget=pokemon
+http://localhost:3000/widget-dev.html?widget=pokemon
 ```
 
 - `?widget=pokemon` - 개발할 widget 이름 (파일명 기준)
@@ -30,7 +29,7 @@ http://localhost:5173/widget-dev.html?widget=pokemon
 ### 3. 테스트 환경 (window.openai 자동 주입)
 
 ```
-http://localhost:5173/test-widget.html
+http://localhost:3000/test-widget.html
 ```
 
 `window.json` 데이터로 window.openai가 자동 주입되어 실제 동작을 테스트할 수 있습니다.
@@ -120,7 +119,7 @@ mountWidget(<YourWidget />);
 1. 개발 서버가 실행 중인지 확인: `pnpm dev`
 2. 브라우저에서 widget 페이지 열기:
    ```
-   http://localhost:5173/widget-dev.html?widget=yourWidget
+   http://localhost:3000/widget-dev.html?widget=yourWidget
    ```
 3. `web/src/widgets/yourWidget.tsx` 파일 수정
 4. **저장하면 즉시 브라우저에 반영됨** (페이지 리로드 없음!)
@@ -215,13 +214,18 @@ apps-sdk-template/
 
 ## 🌐 URL 구조
 
-### 개발 서버 URL
+### 개발 서버 URL (모두 포트 3000)
 
 | URL | 용도 | 설명 |
 |-----|------|------|
-| `http://localhost:5173/widget-dev.html?widget=pokemon` | HMR 개발 | window.openai 없이 example data로 개발 |
-| `http://localhost:5173/test-widget.html` | 통합 테스트 | window.json으로 window.openai 자동 주입 |
-| `http://localhost:3000` | MCP Server | 기존 MCP 서버 |
+| `http://localhost:3000/mcp` | MCP Endpoint | MCP protocol endpoint |
+| `http://localhost:3000/widget-dev.html?widget=pokemon` | HMR 개발 | window.openai 없이 example data로 개발 |
+| `http://localhost:3000/test-widget.html` | 통합 테스트 | window.json으로 window.openai 자동 주입 |
+
+⚡ **포인트**: 모든 것이 **단일 포트(3000)**에서 제공됩니다.
+- Remote 환경에서 포트 하나만 열면 됨 (예: ngrok, codespaces)
+- Vite dev server가 Express 서버의 루트에 마운트되어 HMR 지원
+- HTML 파일들은 커스텀 미들웨어로 직접 서빙
 
 ### Query Parameters
 
@@ -306,7 +310,7 @@ const PokemonWidget = defineWidget({
 ### 접속
 
 ```
-http://localhost:5173/widget-dev.html?widget=pokemon
+http://localhost:3000/widget-dev.html?widget=pokemon
 ```
 
 ---
@@ -350,7 +354,7 @@ pnpm build
 **증상**: Widget이 로드되지 않고 안내 페이지만 표시됨
 
 **해결**:
-- 개발 환경: `http://localhost:5173/test-widget.html` 사용
+- 개발 환경: `http://localhost:3000/test-widget.html` 사용
 - 프로덕션: 부모 iframe에서 window.openai 주입 필요
 
 ### HMR이 작동하지 않음

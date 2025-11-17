@@ -14,6 +14,16 @@ export default defineConfig({
     },
   },
 
+  // Multi-page app configuration
+  build: {
+    rollupOptions: {
+      input: {
+        "widget-dev": path.resolve(__dirname, "widget-dev.html"),
+        "test-widget": path.resolve(__dirname, "test-widget.html"),
+      },
+    },
+  },
+
   server: {
     port: 5173,
     host: true, // 외부 접근 허용 (widgetui-builder iframe)
