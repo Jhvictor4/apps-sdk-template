@@ -13,8 +13,10 @@ import PokemonEvolutionsCard from "./components/molecules/PokemonEvolutionsCard"
 import { getTypeTheme } from "./pokemonTheme";
 import type { Pokemon } from "./types";
 import { useWidgetState } from "@/utils";
+import { defineWidget } from "@/utils/defineWidget";
+import { PokemonSchema, examplePokemonData } from "@apps-sdk-template/shared";
 
-function PokemonWidget() {
+function PokemonWidgetComponent() {
   const fetchedPokemon = useToolOutput() as Pokemon;
   const [{ currentPokemon }, setWidgetState] = useWidgetState<{ currentPokemon: Pokemon }>({
     currentPokemon: fetchedPokemon,
@@ -155,6 +157,13 @@ function PokemonWidget() {
     </div>
   );
 }
+
+// Define widget with schema and example data
+const PokemonWidget = defineWidget({
+  schema: PokemonSchema,
+  exampleOutput: examplePokemonData,
+  component: PokemonWidgetComponent,
+});
 
 export default PokemonWidget;
 

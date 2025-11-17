@@ -13,4 +13,18 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
+  server: {
+    port: 5173,
+    host: true, // 외부 접근 허용 (widgetui-builder iframe)
+    cors: {
+      origin: "*", // 개발 환경에서 모든 origin 허용
+      credentials: true,
+    },
+    hmr: {
+      protocol: "ws",
+      host: "localhost",
+      port: 5173,
+    },
+  },
 });
