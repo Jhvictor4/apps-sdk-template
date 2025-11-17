@@ -14,6 +14,15 @@ export default defineConfig({
     },
   },
 
+  // Multi-page app configuration
+  build: {
+    rollupOptions: {
+      input: {
+        "widget-dev": path.resolve(__dirname, "dev/widget-dev.html"),
+        "test-widget": path.resolve(__dirname, "dev/test-widget.html"),
+      },
+    },
+  },
 
   server: {
     port: 5173,
