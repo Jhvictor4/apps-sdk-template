@@ -2,7 +2,6 @@ import express, { type Express } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { mountWidgetDevServer } from "@apps-sdk-template/widget-dev-server";
 import { env } from "./env.js";
 import { mcp } from "./middleware.js";
 import server from "./server.js";
@@ -17,19 +16,9 @@ app.use(express.json());
 // MCP endpoint must be registered first
 app.use(mcp(server));
 
-if (env.NODE_ENV !== "production") {
-  // Mount widget dev server with HMR support (auto-detects workspace root)
-  await mountWidgetDevServer(app);
-} else {
-  // Production: serve static files from dist
-  const webDistPath = path.resolve(__dirname, "assets");
-
-  // Serve /dev files (widget-dev.html, test-widget.html)
-  app.use("/dev", express.static(path.join(webDistPath, "dev")));
-
-  // Serve widget bundles and other assets
-  app.use(express.static(webDistPath));
-}
+// Serve static files from dist
+const webDistPath = path.resolve(__dirname, "assets");
+app.use(express.static(webDistPath));
 
 app.listen(3000, (error) => {
   if (error) {
@@ -37,11 +26,8 @@ app.listen(3000, (error) => {
     process.exit(1);
   }
 
-  console.log(`Server listening on port 3000 - ${env.NODE_ENV}`);
-  console.log(`Widget dev environment: http://localhost:3000/dev/widget-dev.html`);
-  console.log(
-    "Make your local server accessible with 'ngrok http 3000' and connect to ChatGPT with URL https://xxxxxx.ngrok-free.app/mcp",
-  );
+  console.log(`Server listening on port 3000`);
+  console.log(`MCP endpoint: http://localhost:3000/mcp`);
 });
 
 process.on("SIGINT", async () => {
