@@ -41,7 +41,6 @@ server.widget(
   WIDGET_NAME,
   {
     description: "Pokedex entry for a pokemon",
-    exampleOutput: widgetMetadata[WIDGET_NAME]?.exampleOutput,
   },
   {
     description:
@@ -49,6 +48,11 @@ server.widget(
     inputSchema: {
       name: z.string().describe("Pokemon name, always in english"),
     },
+    _meta: widgetMetadata[WIDGET_NAME]?.exampleOutput
+      ? {
+          exampleOutput: widgetMetadata[WIDGET_NAME].exampleOutput,
+        }
+      : {},
   },
   async ({ name }): Promise<CallToolResult> => {
     try {
