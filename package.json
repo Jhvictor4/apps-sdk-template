@@ -6,7 +6,8 @@
   "type": "module",
   "packageManager": "pnpm@10.18.3",
   "scripts": {
-    "dev": "pnpm --filter @apps-sdk-template/server dev",
+    "dev": "concurrently -n \"server,widget\" -c \"blue,magenta\" \"pnpm --filter @apps-sdk-template/server dev\" \"pnpm --filter @apps-sdk-template/web dev\"",
+    "dev:server": "pnpm --filter @apps-sdk-template/server dev",
     "dev:widget": "pnpm --filter @apps-sdk-template/web dev",
     "build": "pnpm web:build && rm -rf server/dist && pnpm --filter=@apps-sdk-template/server --prod deploy server/dist && cp -r web/dist server/dist/assets && pnpm --filter=@apps-sdk-template/server build",
     "start": "pnpm server:start",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
+    "concurrently": "^9.2.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "prettier": "^3.5.3",
