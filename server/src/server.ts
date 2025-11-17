@@ -10,13 +10,22 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load widget metadata (exampleOutput)
-let widgetMetadata: Record<string, any> = {};
-try {
-  const metadataPath = join(__dirname, "metadata.json");
-  widgetMetadata = JSON.parse(readFileSync(metadataPath, "utf-8"));
-} catch (error) {
-  console.warn("[server] metadata.json not found, widgets will not have exampleOutput");
+interface WidgetMetadata {
+  name: string;
+  exampleOutput: unknown;
 }
+
+function loadWidgetMetadata(): Record<string, WidgetMetadata> {
+  try {
+    const metadataPath = join(__dirname, "metadata.json");
+    return JSON.parse(readFileSync(metadataPath, "utf-8"));
+  } catch (error) {
+    console.warn("[server] metadata.json not found, widgets will not have exampleOutput");
+    return {};
+  }
+}
+
+const widgetMetadata = loadWidgetMetadata();
 
 const server = new McpServer(
   {
@@ -26,11 +35,13 @@ const server = new McpServer(
   { capabilities: {} },
 );
 
+const WIDGET_NAME = "pokemon" as const;
+
 server.widget(
-  "pokemon",
+  WIDGET_NAME,
   {
     description: "Pokedex entry for a pokemon",
-    exampleOutput: widgetMetadata.pokemon?.exampleOutput,
+    exampleOutput: widgetMetadata[WIDGET_NAME]?.exampleOutput,
   },
   {
     description:
