@@ -2,6 +2,21 @@ import { type CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { getPokemon } from "./pokedex.js";
 import { z } from "zod";
 import { McpServer } from "skybridge/server";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load widget metadata (exampleOutput)
+let widgetMetadata: Record<string, any> = {};
+try {
+  const metadataPath = join(__dirname, "metadata.json");
+  widgetMetadata = JSON.parse(readFileSync(metadataPath, "utf-8"));
+} catch (error) {
+  console.warn("[server] metadata.json not found, widgets will not have exampleOutput");
+}
 
 const server = new McpServer(
   {
@@ -15,6 +30,7 @@ server.widget(
   "pokemon",
   {
     description: "Pokedex entry for a pokemon",
+    exampleOutput: widgetMetadata.pokemon?.exampleOutput,
   },
   {
     description:
