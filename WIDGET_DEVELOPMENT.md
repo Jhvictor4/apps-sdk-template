@@ -20,7 +20,7 @@ pnpm dev
 브라우저에서 다음 URL로 접속:
 
 ```
-http://localhost:3000/widget-dev.html?widget=pokemon
+http://localhost:3000/dev/widget-dev.html?widget=pokemon
 ```
 
 - `?widget=pokemon` - 개발할 widget 이름 (파일명 기준)
@@ -29,7 +29,7 @@ http://localhost:3000/widget-dev.html?widget=pokemon
 ### 3. 테스트 환경 (window.openai 자동 주입)
 
 ```
-http://localhost:3000/test-widget.html
+http://localhost:3000/dev/test-widget.html
 ```
 
 `window.json` 데이터로 window.openai가 자동 주입되어 실제 동작을 테스트할 수 있습니다.
@@ -119,7 +119,7 @@ mountWidget(<YourWidget />);
 1. 개발 서버가 실행 중인지 확인: `pnpm dev`
 2. 브라우저에서 widget 페이지 열기:
    ```
-   http://localhost:3000/widget-dev.html?widget=yourWidget
+   http://localhost:3000/dev/widget-dev.html?widget=yourWidget
    ```
 3. `web/src/widgets/yourWidget.tsx` 파일 수정
 4. **저장하면 즉시 브라우저에 반영됨** (페이지 리로드 없음!)
@@ -219,8 +219,8 @@ apps-sdk-template/
 | URL | 용도 | 설명 |
 |-----|------|------|
 | `http://localhost:3000/mcp` | MCP Endpoint | MCP protocol endpoint |
-| `http://localhost:3000/widget-dev.html?widget=pokemon` | HMR 개발 | window.openai 없이 example data로 개발 |
-| `http://localhost:3000/test-widget.html` | 통합 테스트 | window.json으로 window.openai 자동 주입 |
+| `http://localhost:3000/dev/widget-dev.html?widget=pokemon` | HMR 개발 | window.openai 없이 example data로 개발 |
+| `http://localhost:3000/dev/test-widget.html` | 통합 테스트 | window.json으로 window.openai 자동 주입 |
 
 ⚡ **포인트**: 모든 것이 **단일 포트(3000)**에서 제공됩니다.
 - Remote 환경에서 포트 하나만 열면 됨 (예: ngrok, codespaces)
@@ -310,7 +310,7 @@ const PokemonWidget = defineWidget({
 ### 접속
 
 ```
-http://localhost:3000/widget-dev.html?widget=pokemon
+http://localhost:3000/dev/widget-dev.html?widget=pokemon
 ```
 
 ---

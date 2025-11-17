@@ -1,8 +1,8 @@
 import express, { type Express } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { readFile } from "fs/promises";
 
-import { widgetsDevServer } from "skybridge/server";
 import type { ViteDevServer } from "vite";
 import { env } from "./env.js";
 import { mcp } from "./middleware.js";
@@ -19,32 +19,57 @@ app.use(express.json());
 app.use(mcp(server));
 
 if (env.NODE_ENV !== "production") {
-  // Mount Vite dev server at root (as required by widgetsDevServer)
-  const viteMiddleware = await widgetsDevServer();
+  // Create Vite dev server directly to access transformIndexHtml
+  const { createServer, searchForWorkspaceRoot, loadConfigFromFile } = await import("vite");
+  const workspaceRoot = searchForWorkspaceRoot(process.cwd());
+  const webAppRoot = path.join(workspaceRoot, "web");
+  const configResult = await loadConfigFromFile(
+    { command: "serve", mode: "development" },
+    path.join(webAppRoot, "vite.config.ts"),
+    webAppRoot,
+  );
 
-  // Add custom middleware to serve HTML files from web root
-  app.use(async (req, res, next) => {
+  const { build, preview, ...devConfig } = configResult?.config || {};
+  const vite = await createServer({
+    ...devConfig,
+    configFile: false,
+    appType: "custom",
+    server: {
+      allowedHosts: true,
+      middlewareMode: true,
+    },
+    root: webAppRoot,
+    optimizeDeps: {
+      include: ["react", "react-dom/client"],
+    },
+  });
+
+  // Add custom middleware to serve and transform HTML files from /dev
+  app.use("/dev", async (req, res, next) => {
     const htmlFiles = ["widget-dev.html", "test-widget.html"];
     const requestedFile = req.path.slice(1); // Remove leading slash
 
     if (htmlFiles.includes(requestedFile)) {
-      const webRoot = path.resolve(__dirname, "../../web");
-      const htmlPath = path.join(webRoot, requestedFile);
+      const htmlPath = path.join(webAppRoot, "dev", requestedFile);
 
       try {
-        const { readFile } = await import("fs/promises");
-        const html = await readFile(htmlPath, "utf-8");
+        let html = await readFile(htmlPath, "utf-8");
+        // Transform HTML with Vite to process script tags and imports
+        html = await vite.transformIndexHtml(req.url, html);
         res.setHeader("Content-Type", "text/html");
         res.send(html);
         return;
       } catch (error) {
         console.error(`Failed to serve ${requestedFile}:`, error);
+        next(error);
+        return;
       }
     }
     next();
   });
 
-  app.use(viteMiddleware);
+  // Mount Vite middleware
+  app.use(vite.middlewares);
 } else {
   // Production: serve static files from dist
   const webDistPath = path.resolve(__dirname, "../assets");
@@ -58,7 +83,7 @@ app.listen(3000, (error) => {
   }
 
   console.log(`Server listening on port 3000 - ${env.NODE_ENV}`);
-  console.log(`Widget dev environment: http://localhost:3000/widget-dev.html`);
+  console.log(`Widget dev environment: http://localhost:3000/dev/widget-dev.html`);
   console.log(
     "Make your local server accessible with 'ngrok http 3000' and connect to ChatGPT with URL https://xxxxxx.ngrok-free.app/mcp",
   );
