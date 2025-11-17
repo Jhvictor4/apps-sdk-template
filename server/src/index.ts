@@ -22,7 +22,7 @@ if (env.NODE_ENV !== "production") {
   await mountWidgetDevServer(app);
 } else {
   // Production: serve static files from dist
-  const webDistPath = path.resolve(__dirname, "../assets");
+  const webDistPath = path.resolve(__dirname, "assets");
 
   // Serve /dev files (widget-dev.html, test-widget.html)
   app.use("/dev", express.static(path.join(webDistPath, "dev")));

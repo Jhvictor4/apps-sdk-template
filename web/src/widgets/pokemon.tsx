@@ -16,6 +16,7 @@ import { defineWidget } from "@/utils/defineWidget";
 import { PokemonSchema, examplePokemonData, type Pokemon } from "@apps-sdk-template/shared";
 
 function PokemonWidgetComponent() {
+  // Test change for rebuild timing
   const fetchedPokemon = useToolOutput() as Pokemon;
   const [{ currentPokemon }, setWidgetState] = useWidgetState<{ currentPokemon: Pokemon }>({
     currentPokemon: fetchedPokemon,
