@@ -37,10 +37,17 @@ const server = new McpServer(
 
 const WIDGET_NAME = "pokemon" as const;
 
+const exampleOutputMeta = widgetMetadata[WIDGET_NAME]?.exampleOutput
+  ? {
+      exampleOutput: widgetMetadata[WIDGET_NAME].exampleOutput,
+    }
+  : {};
+
 server.widget(
   WIDGET_NAME,
   {
     description: "Pokedex entry for a pokemon",
+    _meta: exampleOutputMeta,
   },
   {
     description:
@@ -48,11 +55,7 @@ server.widget(
     inputSchema: {
       name: z.string().describe("Pokemon name, always in english"),
     },
-    _meta: widgetMetadata[WIDGET_NAME]?.exampleOutput
-      ? {
-          exampleOutput: widgetMetadata[WIDGET_NAME].exampleOutput,
-        }
-      : {},
+    _meta: exampleOutputMeta,
   },
   async ({ name }): Promise<CallToolResult> => {
     try {
