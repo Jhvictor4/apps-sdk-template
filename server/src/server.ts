@@ -5,6 +5,7 @@ import { McpServer } from "skybridge/server";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { withCSP } from "./csp.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -57,7 +58,7 @@ server.widget(
     },
     _meta: exampleOutputMeta,
   },
-  async ({ name }): Promise<CallToolResult> => {
+  withCSP(async ({ name }): Promise<CallToolResult> => {
     try {
       const { id, description, ...pokemon } = await getPokemon(name);
 
@@ -94,7 +95,7 @@ server.widget(
         isError: true,
       };
     }
-  },
+  }),
 );
 
 // MCP tools, resource and prompt APIs remains available and unchanged for other clients

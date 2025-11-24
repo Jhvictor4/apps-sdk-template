@@ -20,14 +20,14 @@ app.use(mcp(server));
 const webDistPath = path.resolve(__dirname, "assets");
 app.use(express.static(webDistPath));
 
-app.listen(3000, (error) => {
+app.listen(env.PORT, (error) => {
   if (error) {
     console.error("Failed to start server:", error);
     process.exit(1);
   }
 
-  console.log(`Server listening on port 3000`);
-  console.log(`MCP endpoint: http://localhost:3000/mcp`);
+  console.log(`Server listening on port ${env.PORT}`);
+  console.log(`MCP endpoint: http://localhost:${env.PORT}/mcp`);
 });
 
 process.on("SIGINT", async () => {
