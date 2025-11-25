@@ -6,6 +6,13 @@ import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { withCSP } from "./csp.js";
+import {
+  readFileContent,
+  writeFileContent,
+  listDirectory,
+  searchFiles,
+  deleteFile,
+} from "./filesystem.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -105,5 +112,66 @@ server.tool("capture", "Capture a pokemon", {}, async (): Promise<CallToolResult
     isError: false,
   };
 });
+
+// Filesystem tools for code editing
+server.tool(
+  "read_file",
+  "Read the content of a file at the specified path",
+  {
+    path: z.string().describe("Relative path to the file (e.g., 'src/App.tsx')"),
+  },
+  async ({ path }): Promise<CallToolResult> => {
+    return readFileContent(path);
+  },
+);
+
+server.tool(
+  "write_file",
+  "Write content to a file. Creates the file if it doesn't exist, overwrites if it does.",
+  {
+    path: z.string().describe("Relative path to the file"),
+    content: z.string().describe("The full content to write"),
+  },
+  async ({ path, content }): Promise<CallToolResult> => {
+    return writeFileContent(path, content);
+  },
+);
+
+server.tool(
+  "list_directory",
+  "List files and subdirectories in the specified directory",
+  {
+    path: z.string().default(".").describe("Relative path to the directory (default: '.')"),
+  },
+  async ({ path }): Promise<CallToolResult> => {
+    return listDirectory(path);
+  },
+);
+
+server.tool(
+  "file_search",
+  "Search for files matching a pattern. Supports wildcards like '*.ts' or '**/*.tsx'",
+  {
+    query: z.string().describe("Search query or glob pattern (e.g., '*.ts', 'src/**/*.tsx')"),
+  },
+  async ({ query }): Promise<CallToolResult> => {
+    return searchFiles(query);
+  },
+);
+
+server.tool(
+  "delete_file",
+  "Delete a file or directory. Use recursive option for non-empty directories.",
+  {
+    path: z.string().describe("Relative path to the file or directory to delete"),
+    recursive: z
+      .boolean()
+      .default(false)
+      .describe("Set to true to delete non-empty directories recursively"),
+  },
+  async ({ path, recursive }): Promise<CallToolResult> => {
+    return deleteFile(path, recursive);
+  },
+);
 
 export default server;
